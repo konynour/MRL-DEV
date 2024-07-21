@@ -1,0 +1,155 @@
+<h3>
+    &nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
+    <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
+</h3>
+
+    <br/>
+<!-- {{locale}} -->
+<ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
+    <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
+    <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+</ui-select>
+<br/>
+
+
+<a ng-show="!showInstalledServices" href="" ng-click="showInstalledServices=true"><span class="glyphicon glyphicon-plus"/> installed services</a>
+<a ng-show="showInstalledServices" href="" ng-click="showInstalledServices=false"><span class="glyphicon glyphicon-minus"/> installed services</a>
+<div ng-show="showInstalledServices">
+<button class="btn btn-default" ng-click="msg.install()">install all services</button>    
+<table class="table">
+    <tr>
+        <th>Type</th>
+        <th></th>
+        <th>Installed</th>
+        <th></th>
+    </tr>
+    <tr ng-repeat="serviceType in serviceTypes" ng-class="!serviceType.installed?'not-installed':''">
+        <td><a href="https://myrobotlab.org/service/{{serviceType.simpleName}}"><img ng-src="/{{serviceType.simpleName + '.png'}}" width="16"> {{serviceType.simpleName}}</a></td>
+        <td>{{serviceType.description}}</td>
+        <td><span ng-show="serviceType.installed"class="glyphicon glyphicon-check" ></span> 
+            </span><button ng-show="!serviceType.installed" class="btn btn-default" ng-click="msg.install(serviceType.simpleName)">install</button>            
+        </td>
+        <td>
+            <span ng-show="serviceType.isCloudService"class="glyphicon glyphicon-cloud" ></span>
+        </td>
+    </tr>
+</table>
+</div>    
+
+<br/>
+
+<a ng-show="!showCreateService" href="" ng-click="showCreateService=true"><span class="glyphicon glyphicon-plus"/> create a service</a>
+<a ng-show="showCreateService" href="" ng-click="showCreateService=false"><span class="glyphicon glyphicon-minus"/> create a service</a>
+<div ng-show="showCreateService">
+<br/>
+<div class="form-inline">
+    <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
+    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.simpleName for service in serviceTypes | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
+    <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
+    <button class="btn btn-default" ng-click="saveDefaults()">save defaults</button>
+    <br/>{{defaultsSaved}}
+</div>
+</div>
+<br/>
+<br/>
+<div class="row">
+    <div class="form-group col-md-6">
+        <div>
+            <b>Configurations</b> <a href="" ng-click="msg.publishConfigList()"> <span class="glyphicon glyphicon-refresh" ></span></a> <b>{{getConfigName()}}</b>
+            <br/>
+            <select multiple class="form-control width100pct" ng-change="setConfig()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
+                <option ng-repeat="config in service.configList">{{config}}</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="form-inline">
+    <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">save config</button>
+    <!-- <button class="btn btn-default" title="This will load a config module" ng-click="loadConfig()">load</button>
+    <button class="btn btn-default" title="This will unset current config set" ng-click="savePlan()">save plan</button>
+    <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfig()">unset</button>
+    -->
+    <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
+    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button><br/>
+<br/>
+<span> Auto Start
+        <button class="btn btn-default" ng-show="!startYml.enable" title="This will auto start config on next start"
+            ng-click="setAutoStart(true)">off</button>
+        <button class="btn btn-info" ng-show="startYml.enable" title="This will auto start config on next start"
+            ng-click="setAutoStart(false)">on</button>
+</span>                                    
+    
+<div class="row">&nbsp;</div>
+<div class="row">
+    <form ng-submit="sendToCli(cmd);cmd=null">
+        <div class="form-group col-md-6">
+            <input ng-model="cmd" class="form-control span6" placeholder="command" title="send commands to myrobotlab using the command box &#10;  /{name}/{method}/{parameter0}/{parameter1}/... &#10; ls - list &#10; pwd - print working directory"/>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <textarea ng-model="status" class="form-control" placeholder="status display" rows="8" cols="100" readonly></textarea>
+    </div>
+</div>
+<div class="row">
+    <form ng-submit="connect(connectTo);connectTo=null">
+        <div class="form-group col-md-6">
+            <input ng-model="connectTo" class="form-control span6" placeholder="connect e.g. http://robot.local:8888" title="connect to another instance of mrl"/>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        route table default
+        {{service.routeTable.defaultRoute.destination}}
+<br/>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>destination</th>
+                    <th>channel</th>
+                    <th>metric</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="(id, entry) in service.routeTable.routes">
+                    <!-- td>{{id}}</td -->
+                    <td>{{id}}</td>
+                    <td>{{entry.uuid}}</td>
+                    <td>{{entry.metric}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        channels
+        <br/>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>remote id</th>
+                    <th>gateway type</th>
+                    <th>gateway</th>
+                    <th>connection id</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="(id, entry) in connections">
+                    <!-- td>{{id}}</td -->
+                    <td>{{entry.serializable.id}}</td>
+                    <td>
+                        <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+                    
+                    </td>
+                    <td>{{entry.serializable.gateway}}</td>
+                    <td>
+                        {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

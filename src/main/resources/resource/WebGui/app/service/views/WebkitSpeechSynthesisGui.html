@@ -1,0 +1,19 @@
+<div class="row col-md-6">
+    <div class="row">
+    <!--
+        service.voice.name {{service.voice.name}}<br>
+        voiceSelected {{voiceSelected}}<br>
+        voiceIndex {{voiceIndex}}
+        -->
+    </div>
+    <div class="row">
+        <textarea class="form-control" ng-model="text" rows="10" cols="80"></textarea>
+    </div>
+    <div class="row">
+        <select class="form-control" ng-model="voiceSelected" ng-change="setVoice(voiceSelected)">
+            <option ng-repeat="voice in voices" value="{{voice.name}}">{{voice.name}} {{voice.gender}} {{voice.locale.tag}}  {{voice.description}}</option>
+        </select>
+    </div>
+    <button class="btn btn-default" ng-click="msg.speak(text)">Speak</button>
+    mute <toggle width="70" height="28" ng-model="service.mute" ng-change="!service.mute?setMute(false):setMute(true)" on="ON" off="OFF"/>
+</div>

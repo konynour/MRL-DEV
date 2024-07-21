@@ -1,0 +1,39 @@
+<div class="modal-header">
+    <h3 class="modal-title">It No Worky!</h3>
+</div>
+<div class="modal-body">
+    <div ng-if="status == 'waitingforinformation'">
+        <div class="media">
+            <span class="media-body">
+                Don't panic, our team of crack engineers will evaluate your log file...
+            </span>
+            <span class="media-right">
+                <img src="../expert.jpg" alt="an expert developer" />
+            </span>
+            <br>
+        </div>
+        <div class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="userId" placeholder="user id">
+                <button type="button" class="btn btn-primary" ng-click='noWorky(userId);' tooltip="send log file"
+                    tooltip-placement="bottom">send no worky</button>
+            </div>
+        </div>
+    </div>
+    <div ng-if="status == 'sendingnoworky'">
+        sending ...
+    </div>
+    <div ng-if="status == 'success'">
+        Success noWorky sent !
+        <button class="btn btn-primary" ng-click="close();">close</button>
+    </div>
+    <div ng-if="status == 'error'">
+        the noWorky did not worky !<br>
+        {{statuskey}}<br>
+        <button class="btn btn-primary" ng-click="noWorky(userId)">retry!</button>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-default" ng-click="close();">CANCEL</button>
+    <!--<button class="btn btn-primary" ng-click="send();">SEND</button>-->
+</div>
